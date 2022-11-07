@@ -1,0 +1,19 @@
+[main]
+# .xlsx file to be analysed
+InputFileName = "C:/Users/terry/Documents/Spending data.xlsx"
+
+# File where analysis should be written to (will be created it if doesn't exist).
+OutputFileName = "C:/Users/terry/Documents/SpendingOutput.xlsx"
+
+# List of date ranges to summarise data for
+Queries = [
+    {start_date=2022-11-01, end_date=2022-11-30, alias='November'},
+    {start_date=2022-10-01, end_date=2022-10-31, alias='October'},
+    {start_date=2022-09-01, end_date=2022-09-30, alias="September"},
+    {start_date=2022-08-01, end_date=2022-08-31, alias="August"},
+    {start_date=2022-07-01, end_date=2022-07-31, alias="July"},
+    {start_date=2022-06-01, end_date=2022-06-30, alias="June"},
+    {start_date=2022-05-01, end_date=2022-05-31, alias="May"},
+    {start_date=2022-04-01, end_date=2022-04-30, alias="April"},
+    {start_date=2022-03-01T01:11:00, end_date=2022-03-31T11:56:00, alias="March"},
+]

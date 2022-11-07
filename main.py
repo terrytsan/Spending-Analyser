@@ -7,6 +7,7 @@ import pandas
 import pandas as pd
 from typing import Tuple, List
 
+import tomli
 from datetimerange import DateTimeRange
 from openpyxl import load_workbook, Workbook
 from openpyxl.chart import Reference, PieChart
@@ -14,25 +15,16 @@ from openpyxl.chart.label import DataLabelList
 from openpyxl.styles.numbers import FORMAT_DATE_XLSX14
 from openpyxl.utils import get_column_letter
 
-from configparser import ConfigParser
 from SpendAnalysis import SpendAnalysis
 from excelhelper import write_df_to_ws
 
-config = ConfigParser()
-config.read('settings.ini')
+with open('settings.toml', mode='rb') as f:
+    config = tomli.load(f)
 
-filename = config.get('main', 'InputFileName')
-output_filename = config.get('main', 'OutputFileName')
-query_dates = [
-    SpendAnalysis(datetime(2022, 10, 1), datetime(2022, 10, 31), "October"),
-    SpendAnalysis(datetime(2022, 9, 1), datetime(2022, 9, 30), "September"),
-    SpendAnalysis(datetime(2022, 8, 1), datetime(2022, 8, 31), "August"),
-    SpendAnalysis(datetime(2022, 7, 1), datetime(2022, 7, 31), "July"),
-    SpendAnalysis(datetime(2022, 6, 1), datetime(2022, 6, 30), "June"),
-    SpendAnalysis(datetime(2022, 5, 1), datetime(2022, 5, 31), "May"),
-    SpendAnalysis(datetime(2022, 4, 1), datetime(2022, 4, 30), "April"),
-    SpendAnalysis(datetime(2022, 3, 1), datetime(2022, 3, 31), "March"),
-]
+filename = config['main']['InputFileName']
+output_filename = config['main']['OutputFileName']
+queries = config['main']['Queries']
+query_dates = list(map(lambda x: SpendAnalysis(x['start_date'], x['end_date'], x['alias']), queries))
 output_sheet = "Analysis Output"
 dataStartRow = 2
 dataStartCol = 4
