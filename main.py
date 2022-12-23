@@ -1,4 +1,5 @@
 # This is used for analysing and visualising spending data
+import sys
 from datetime import datetime
 from functools import reduce
 
@@ -99,6 +100,9 @@ def analyse_data_in_dates(
     filters = data.apply(is_intersecting, axis=1, args=(start_date, end_date))
     data_in_dates = data[filters].copy()
 
+    if data_in_dates.empty:
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+
     data_in_dates["Days Used"] = (data_in_dates["Date Finished"] - data_in_dates["Date Started"]).dt.days + 1
     data_in_dates["Cost Per Day"] = data_in_dates["Cost"] / data_in_dates["Days Used"]
 
@@ -156,6 +160,10 @@ if __name__ == '__main__':
         result = analyse_data_in_dates(df, analysis.start_date, analysis.end_date)
         usedInQuery, categorySummary, unfinishedItems = result
 
+        if usedInQuery.empty:
+            print(f"No items used within query {analysis.alias} ({analysis.start_date} - {analysis.end_date}).")
+            continue
+
         analysis.summary_by_category = categorySummary
         analysis.usedItems = usedInQuery
         analysis.unfinishedItems = unfinishedItems
@@ -209,12 +217,19 @@ if __name__ == '__main__':
         currentStartRow = currentStartRow + max(len(categorySummary), len(usedInQuery), len(unfinishedItems)) + 2
         currentStartCol = 4
 
+    # Remove any queries that didn't return any results
+    query_dates = list(filter(lambda x: x.summary_by_category is not None, query_dates))
+
     # Create the summary sheet
     summary_sheet = wb.create_sheet("Summary")
     create_summary_table(summary_sheet, query_dates)
 
     wb.remove(wb['Sheet'])
-    wb.save(filename=output_filename)
+    try:
+        wb.save(filename=output_filename)
+    except PermissionError:
+        print(f"\033[91mFailed to save to output path {output_filename}. Ensure you have write permissions and the file is not open.\033[0m")
+        sys.exit(1)
 
     # Print additional info - not written to sheet
     unused = df[df['Date Started'].isnull()]
